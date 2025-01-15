@@ -17,7 +17,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { onMounted, ref } from 'vue';
-
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 
 let directoryA = ref("");
@@ -49,7 +49,7 @@ onMounted(async () => {
   <div class="w-full h-full flex flex-col">
     <FrameBar title="DC" />
     <div class="w-full h-full m-0">
-      <ResizablePanelGroup id="vertical-demo-group-1" direction="vertical" class="min-h-[200px] w-full border">
+      <ResizablePanelGroup id="vertical-demo-group-1" direction="vertical" class="min-h-[200px] w-full h-full border">
         <ResizablePanel id="vertical-demo-panel-1" :default-size="25">
           <ResizablePanelGroup id="group-2" class="min-h-[200px] w-full border" direction="horizontal">
             <ResizablePanel id="panel-1" :default-size="50">
@@ -77,28 +77,27 @@ onMounted(async () => {
         </ResizablePanel>
         <ResizableHandle id="vertical-demo-handle-1" />
         <ResizablePanel id="vertical-demo-panel-2" :default-size="75">
-          <div class="flex flex-col h-full items-center justify-left p-6">
+          <div class="flex flex-col h-full w-full items-center justify-left p-6">
             <Button type="submit" @click="compareDirectories(directoryA, directoryB)">Run</Button>
-            <div class="w-full px-20">
+            <ScrollArea class="w-full h-full px-20 py-2">
               <Table>
-              <TableCaption>A list of diff files</TableCaption>
-              <TableHeader>
-                <TableRow >
-                  <TableHead class="w-[100px]">
-                    Files
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow v-for="file in diffRes" :key="file">
-                  <TableCell class="font-medium">
-                    {{ file }}
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-            </div>
-            
+                <TableCaption>A list of diff files</TableCaption>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead class="w-[100px]">
+                      Files
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow v-for="file in diffRes" :key="file">
+                    <TableCell class="font-medium">
+                      {{ file }}
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </ScrollArea>
           </div>
         </ResizablePanel>
       </ResizablePanelGroup>

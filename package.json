@@ -19,7 +19,10 @@
     "directories": {
       "buildResources": "assets",
       "output": "dist_electron"
-    }
+    },
+    "files":[
+
+    ]
   },
   "dependencies": {
     "@vueuse/core": "^12.4.0",

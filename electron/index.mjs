@@ -22,7 +22,7 @@ function createWindow() {
         frame: false,
         webPreferences: {
             preload: path.join(__dirname, "preload.mjs"),
-            devTools: mode == "development" ? true : true,
+            devTools: mode == "development" ? true : false,
             nodeIntegration: true,
             contextIsolation: true,
         },
