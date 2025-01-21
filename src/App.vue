@@ -31,8 +31,9 @@ async function browseDirectory(path) {
 
 async function compareDirectories(dirA, dirB) {
   const res = await directoryApi.compareDirectories(dirA, dirB)
-  console.log(res);
-  diffRes.value = res;
+  const res1 = await directoryApi.assignDirectoryGroup(res, dirA, dirB)
+  console.log(res1);
+  diffRes.value = res1;
   return 0;
 }
 
@@ -54,7 +55,8 @@ onMounted(async () => {
           <ResizablePanelGroup id="group-2" class="min-h-[200px] w-full border" direction="horizontal">
             <ResizablePanel id="panel-1" :default-size="50">
               <div class="flex flex-col h-full items-center justify-center p-6">
-                <label for="directory A">Directory A</label>
+                <label for="directory A"><span class=" inline-block bg-pink-500 rounded-sm w-3 h-3"></span>Directory A
+                </label>
                 <div class="flex w-full max-w-sm items-center gap-1.5">
                   <Input id="directory A" type="text" placeholder="Directory" v-model:model-value="directoryA" />
                   <Button type="submit"
@@ -65,7 +67,8 @@ onMounted(async () => {
             <ResizableHandle id="handle-1" />
             <ResizablePanel id="panel-2" :default-size="50">
               <div class="flex flex-col h-full items-center justify-center p-6">
-                <label for="directory B">Directory B</label>
+                <label for="directory B"><span class=" inline-block bg-purple-500 rounded-sm w-3 h-3"></span>Directory
+                  B</label>
                 <div class="flex w-full max-w-sm items-center gap-1.5">
                   <Input id="directory B" type="text" placeholder="Directory" v-model:model-value="directoryB" />
                   <Button type="submit"
@@ -90,9 +93,11 @@ onMounted(async () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  <TableRow v-for="file in diffRes" :key="file">
-                    <TableCell class="font-medium">
-                      {{ file }}
+                  <TableRow v-for="[file,value] in diffRes" :key="file">
+                    <TableCell class="font-medium h-full flex items-center gap-1">
+                      <div class="bg-pink-500 w-3 h-3 rounded-sm" :class="(value&1)===0?'opacity-0':'opacity-100' "></div>
+                      <p class="flex-grow">{{ file }}</p>
+                      <div class="bg-purple-500 w-3 h-3 rounded-sm" :class="(value&2)===0?'opacity-0':'opacity-100' " ></div>
                     </TableCell>
                   </TableRow>
                 </TableBody>

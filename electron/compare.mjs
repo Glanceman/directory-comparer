@@ -1,5 +1,6 @@
 import fs from "fs";
 import { createHash } from 'crypto';
+import { readdir } from 'fs/promises';
 
 export async function compareDirectories(dirA, dirB) {
     try {
@@ -9,22 +10,19 @@ export async function compareDirectories(dirA, dirB) {
             throw new Error('Both paths must be directories.');
         }
 
-        // Fixed: await readdir calls
-        const filesA = await fs.promises.readdir(dirA, { withFileTypes: true });
-        const filesB = await fs.promises.readdir(dirB, { withFileTypes: true });
+        // Read files in dirA and store in a set
+        const filesInA = new Set(await readdir(dirA, {withFileTypes:false, recursive: true }));
+        // Read files in dirB and store in a set
+        const filesInB = new Set(await readdir(dirB, {withFileTypes:false, recursive: true }));
 
         // Filter only files for now, ignore directories
-        const filesOnlyA = filesA.filter(dirent => !dirent.isDirectory()).map(dirent => dirent.name);
-        const filesOnlyB = filesB.filter(dirent => !dirent.isDirectory()).map(dirent => dirent.name);
+        const filesOnlyA = new Set([...filesInA].filter(file => !fs.lstatSync(`${dirA}/${file}`).isDirectory()&&!filesInB.has(file)));
+        const filesOnlyB = new Set([...filesInB].filter(file => !fs.lstatSync(`${dirB}/${file}`).isDirectory()&&!filesInA.has(file)));
 
-        const uniqueToA = filesOnlyA.filter(file => !filesOnlyB.includes(file));
-        const uniqueToB = filesOnlyB.filter(file => !filesOnlyA.includes(file));
+        const commonFiles = new Set([...filesInA].filter(file => !fs.lstatSync(`${dirA}/${file}`).isDirectory()&&filesInB.has(file)));
 
-        const commonFiles = filesOnlyA.filter(file => filesOnlyB.includes(file));
-
-        // Fixed: Promise.all with proper async/await
         const differentContent = await Promise.all(
-            commonFiles.map(async file => {
+            [...commonFiles].map(async file => {
                 const filePathA = `${dirA}/${file}`;
                 const filePathB = `${dirB}/${file}`;
                 const hashA = await getMd5Hash(filePathA);
@@ -33,38 +31,12 @@ export async function compareDirectories(dirA, dirB) {
             })
         ).then(files => files.filter(Boolean));
 
-        const result = uniqueToA.concat(uniqueToB, differentContent);
-
-        // Now handle subdirectories
-        const dirsOnlyA = filesA.filter(dirent => dirent.isDirectory()).map(dirent => dirent.name);
-        const dirsOnlyB = filesB.filter(dirent => dirent.isDirectory()).map(dirent => dirent.name);
-
-        const commonDirs = dirsOnlyA.filter(dir => dirsOnlyB.includes(dir));
-
-        const subdirResults = await Promise.all(commonDirs.map(async dir => {
-            const subDirA = `${dirA}/${dir}`;
-            const subDirB = `${dirB}/${dir}`;
-            return await compareDirectories(subDirA, subDirB);
-        }));
-
-        const subdirFiles = subdirResults.flat();
-
-        return result.concat(subdirFiles);
+        const result = [...filesOnlyA, ...filesOnlyB, ...differentContent];
+        console.log(result);
+        return result;
     } catch (err) {
-        if (err.code === 'ENOENT') {
-            // Fixed: Remove await from fs.existsSync and use proper async readdir
-            if (fs.existsSync(dirA)) {
-                const files = await fs.promises.readdir(dirA, { withFileTypes: true });
-                return files.map(dirent => dirent.name);
-            } else if (fs.existsSync(dirB)) {
-                const files = await fs.promises.readdir(dirB, { withFileTypes: true });
-                return files.map(dirent => dirent.name);
-            } else {
-                return [];
-            }
-        } else {
-            throw err;
-        }
+        console.error('compareDirectories', err);
+        throw err;
     }
 }
 
@@ -72,4 +44,38 @@ export async function compareDirectories(dirA, dirB) {
 async function getMd5Hash(filePath) {
     const buffer = await fs.promises.readFile(filePath);
     return createHash('md5').update(buffer).digest('hex');
+}
+
+
+
+export async function assignDirectoryGroup(files, dirA, dirB) {
+    try {
+        // Read files in dirA and store in a set
+        const filesInA = new Set(await readdir(dirA, { recursive: true }));
+        // Read files in dirB and store in a set
+        const filesInB = new Set(await readdir(dirB, { recursive: true }));
+
+        // Prepare the result map
+        const result = new Map();
+
+        // Handle files only in filesInA
+        files.forEach(file => {
+            let value = 0;
+            if (filesInA.has(file)) {
+                value = 1;
+            }
+            if (filesInB.has(file)) {
+                value += 2;
+            }
+            result.set(file, value);
+        });
+
+        // Convert result to array if needed
+        const resultArray = Array.from(result);
+
+        return resultArray;
+    } catch (err) {
+        console.error('Error assigning directory groups:', err);
+        throw err;
+    }
 }

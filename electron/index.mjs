@@ -5,7 +5,7 @@ import { app, BrowserWindow, ipcMain,dialog} from "electron"
 import { fileURLToPath } from 'url';
 import path from "path"
 import fs from "fs"
-import { compareDirectories } from "./compare.mjs";
+import { compareDirectories,assignDirectoryGroup } from "./compare.mjs";
 app.commandLine.appendSwitch("--in-process-gpu");
 const mode = app.commandLine.getSwitchValue("mode");
 
@@ -83,6 +83,9 @@ ipcMain.handle('compare-directory', async(event,dirA,dirB)=>{
     return await compareDirectories(dirA,dirB);
 })
 
+ipcMain.handle('assignDirectoryGroup',async(event,files,dirA,dirB)=>{
+    return await assignDirectoryGroup(files,dirA,dirB)
+})
 
 app.whenReady().then(() => {
     createWindow();
