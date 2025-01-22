@@ -37,6 +37,14 @@ async function compareDirectories(dirA, dirB) {
   return 0;
 }
 
+function openDirectory(dir){
+  console.log(`open ${dir}`);
+  directoryApi.openDirectory(dir);
+}
+function getParentPath(filePath){
+  return filePath.substring(0,filePath.lastIndexOf("\\"));
+}
+
 onMounted(async () => {
   const homeDir = await directoryApi.getHomeDirectory()
   console.log(homeDir);
@@ -95,9 +103,11 @@ onMounted(async () => {
                 <TableBody>
                   <TableRow v-for="[file,value] in diffRes" :key="file">
                     <TableCell class="font-medium h-full flex items-center gap-1">
-                      <div class="bg-pink-500 w-3 h-3 rounded-sm" :class="(value&1)===0?'opacity-0':'opacity-100' "></div>
                       <p class="flex-grow">{{ file }}</p>
-                      <div class="bg-purple-500 w-3 h-3 rounded-sm" :class="(value&2)===0?'opacity-0':'opacity-100' " ></div>
+                      <div class="flex gap-1">
+                        <button class="bg-pink-500 w-3 h-3 rounded-sm" :class="(value&1)===0?'opacity-0':'opacity-100'" @click="openDirectory(getParentPath(directoryA+'\\'+file))"></button>
+                        <button class="bg-purple-500 w-3 h-3 rounded-sm" :class="(value&2)===0?'opacity-0':'opacity-100'" @click="openDirectory(getParentPath(directoryB+'\\'+file))"></button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 </TableBody>

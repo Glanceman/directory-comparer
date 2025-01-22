@@ -30,4 +30,7 @@ contextBridge.exposeInMainWorld("directoryApi",{
     ipcRenderer.invoke('compare-directory',dirA,dirB),
   assignDirectoryGroup:(files,dirA,dirB)=>
     ipcRenderer.invoke('assignDirectoryGroup',files,dirA,dirB),
+  openDirectory:(dir)=>{
+    ipcRenderer.send("openDirectory",dir)
+  }
 })

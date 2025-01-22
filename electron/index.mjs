@@ -1,11 +1,12 @@
 //const {app,BrowserWindow,ipcMain,} = require("electron");
 //const path = require("path");
 
-import { app, BrowserWindow, ipcMain,dialog} from "electron"
+import { app, BrowserWindow, ipcMain, dialog } from "electron"
 import { fileURLToPath } from 'url';
 import path from "path"
 import fs from "fs"
-import { compareDirectories,assignDirectoryGroup } from "./compare.mjs";
+import { compareDirectories, assignDirectoryGroup } from "./compare.mjs";
+import { exec } from "child_process";
 app.commandLine.appendSwitch("--in-process-gpu");
 const mode = app.commandLine.getSwitchValue("mode");
 
@@ -63,9 +64,9 @@ ipcMain.handle('get-home-directory', () => {
     return process.env.HOME || process.env.USERPROFILE || '/';
 });
 
-ipcMain.handle('select-directory', async (event,folderPath) => {
+ipcMain.handle('select-directory', async (event, folderPath) => {
     console.log(folderPath)
-    if(folderPath === null && fs.existsSync(folderPath)===false){
+    if (folderPath === null && fs.existsSync(folderPath) === false) {
         folderPath = process.env.HOME || process.env.USERPROFILE || '/';
     }
     const options = {
@@ -79,12 +80,26 @@ ipcMain.handle('select-directory', async (event,folderPath) => {
     return folderPath;
 });
 
-ipcMain.handle('compare-directory', async(event,dirA,dirB)=>{
-    return await compareDirectories(dirA,dirB);
+ipcMain.handle('compare-directory', async (event, dirA, dirB) => {
+    return await compareDirectories(dirA, dirB);
 })
 
-ipcMain.handle('assignDirectoryGroup',async(event,files,dirA,dirB)=>{
-    return await assignDirectoryGroup(files,dirA,dirB)
+ipcMain.handle('assignDirectoryGroup', async (event, files, dirA, dirB) => {
+    return await assignDirectoryGroup(files, dirA, dirB)
+})
+
+ipcMain.on('openDirectory', (event, dir) => {
+    if (fs.lstatSync(dir).isDirectory()) {
+        exec(`start "" "${dir}"`, (err) => {
+            if (err) {
+                console.error(`Failed to open ${dir} : ${err}`);
+            } else {
+                console.log(`Successfully opened ${dir}`);
+            }
+        });
+    } else {
+        console.error(`Failed to open ${dir} as it is not a directory`);
+    }
 })
 
 app.whenReady().then(() => {
