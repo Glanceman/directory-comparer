@@ -13,7 +13,7 @@
     "electron:build": "npm run build && electron-builder"
   },
   "build": {
-    "productName":"Directory Comparer",
+    "productName":"Directory Comparer", 
     "compression":"maximum",
     "asar": true,
     "directories": {
@@ -25,7 +25,10 @@
       "!**/*",
       "dist/**/*",
       "electron/**/*"
-    ]
+    ],
+    "win":{
+      "icon":"./public/icon.ico"
+    }
   },
   "dependencies": {
     "@vueuse/core": "^12.4.0",

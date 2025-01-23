@@ -27,6 +27,7 @@ function createWindow() {
             nodeIntegration: true,
             contextIsolation: true,
         },
+        icon:path.join(__dirname, "../public/icon.png")
     });
 
     //win.loadFile('index.html')

@@ -1,6 +1,7 @@
 <template>
     <div class="framebar h-8 flex justify-center self-stretch items-center bg-slate-900 backdrop-blur-sm;">
-        <div class="flex px-5 flex-row content-center grow">
+        <div class="flex px-4 gap-1 flex-row content-center items-center grow">
+            <img class=" w-5 h-5" src="/icon.png" alt="icon"></img>
             <div class="justify-center text-white font-bold text-lg">
                 {{ title }}
             </div>
