@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/table'
 import { onMounted, ref } from 'vue';
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Progress } from './components/ui/progress';
 
 
 let directoryA = ref("");
@@ -29,11 +30,20 @@ async function browseDirectory(path) {
   return res;
 }
 
+let progressState = ref({
+  state:true,
+  value :0
+});
 async function compareDirectories(dirA, dirB) {
+  progressState.value.state = false;
+  progressState.value.value = 1;
   const res = await directoryApi.compareDirectories(dirA, dirB)
+  progressState.value.value = 50
   const res1 = await directoryApi.assignDirectoryGroup(res, dirA, dirB)
   console.log(res1);
   diffRes.value = res1;
+  progressState.value.state = true;
+  progressState.value.value = 100;
   return 0;
 }
 
@@ -91,6 +101,7 @@ onMounted(async () => {
           <div class="flex flex-col h-full w-full items-center justify-left p-6">
             <Button type="submit" @click="compareDirectories(directoryA, directoryB)">Run</Button>
             <ScrollArea class="w-full h-full px-20 py-2">
+              <Progress v-show="!progressState.state" :model-value="progressState.value"></Progress>
               <Table>
                 <TableCaption>A list of diff files</TableCaption>
                 <TableHeader>
